@@ -23,8 +23,11 @@ class Device():
             return self.conn.rpc(rpc).xpath(xpath)
         return self.conn.rpc(rpc)
 
-    def apply_config_template(self, cfg, from_file=False):
-        config = open(f"configs/{cfg}").read()
+    def apply_config(self, cfg, from_file=False):
+        if from_file:
+            config = open(f"configs/{cfg}").read()
+        else:
+            config = cfg
         self.conn.lock()
         self.conn.load_configuration(config=config, action="set")
         diff = self.conn.compare_configuration()
@@ -46,8 +49,11 @@ class LegacyDevice(Device):
         output = self.conn.send_command(cmd)
         return output
 
-    def apply_config_template(self, cfg, from_file=False):
-        result = self.conn.send_config_from_file(f"configs/{cfg}")
+    def apply_config(self, cfg, from_file=False):
+        if from_file:
+            result = self.conn.send_config_from_file(f"configs/{cfg}")
+        else:
+            result = self.conn.send_config_set(cfg)
         self.conn.commit()
         return result
 
