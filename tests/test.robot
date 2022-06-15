@@ -1,7 +1,8 @@
 *** Settings ***
 Documentation       Sample framework for network testing
-
-Library    ../JunosDevice.py
+Library             ../JunosDevice.py
+Suite Setup         Initial Config
+Suite Teardown      Final Config
 
 *** Variables ***
 &{HOST 1}                ip=vsrx1
@@ -11,8 +12,22 @@ ${USERNAME}              cristian
 ${PASSWORD}              Juniper
 ${BGP_STATE}             Established
 
+*** Keywords ***
+Initial Config
+    FOR    ${HOST}    IN   @{HOSTS}
+        Connect Device  host=${HOST.ip}     username=${USERNAME}     password=${PASSWORD}
+        Apply Config    cfg=${HOST.ip}_initial      from_file=True
+        Sleep   15s
+    END
+
+Final Config
+    FOR    ${HOST}    IN   @{HOSTS}
+        Connect Device  host=${HOST.ip}     username=${USERNAME}     password=${PASSWORD}
+        Apply Config    cfg=${HOST.ip}_final      from_file=True
+    END
+
 *** Test Cases ***
-Check BGP Status
+Check Initial BGP Status
     FOR    ${HOST}    IN   @{HOSTS}
         Connect Device  host=${HOST.ip}     username=${USERNAME}     password=${PASSWORD}
         ${state}=    Check Bgp State
