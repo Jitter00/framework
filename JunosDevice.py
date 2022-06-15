@@ -77,22 +77,3 @@ class JunosDevice():
             )
             result = state[0].text
         return result
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
