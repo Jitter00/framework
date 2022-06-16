@@ -1,3 +1,4 @@
 set protocols bgp group test type internal
 set protocols bgp group test local-as 64512
 set protocols bgp group test neighbor 192.168.153.100
+set protocols bgp group test authentication-key test
