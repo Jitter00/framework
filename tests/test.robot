@@ -17,8 +17,8 @@ Initial Config
     FOR    ${HOST}    IN   @{HOSTS}
         Connect Device  host=${HOST.ip}     username=${USERNAME}     password=${PASSWORD}
         Apply Config    cfg=${HOST.ip}_initial      from_file=True
-        Sleep   15s
     END
+    Sleep   15s
 
 Final Config
     FOR    ${HOST}    IN   @{HOSTS}
@@ -27,9 +27,16 @@ Final Config
     END
 
 *** Test Cases ***
-Check Initial BGP Status
+Initial BGP Status
     FOR    ${HOST}    IN   @{HOSTS}
         Connect Device  host=${HOST.ip}     username=${USERNAME}     password=${PASSWORD}
         ${state}=    Check Bgp State
         Should Be Equal As Strings      ${state}      ${BGP_STATE}
     END
+
+Wrong BGP Authentication
+    Connect Device  host=vsrx1     username=${USERNAME}     password=${PASSWORD}
+    Apply Config    cfg=wrong_key      from_file=True
+    Sleep   5s
+    ${state}=    Check Bgp State
+    Should Not Be Equal As Strings      ${state}      ${BGP_STATE}
