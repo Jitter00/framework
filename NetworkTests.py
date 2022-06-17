@@ -1,3 +1,4 @@
+import re
 from device import Device
 
 
@@ -36,7 +37,17 @@ class NetworkTests:
 
     def check_bgp_state(self):
         for dev in self.dev_pool:
-            bgp_state = dev.check_bgp_state()
-            if bgp_state != "Established":
-                return False
-        return "Established"
+            if dev.legacy:
+                state = dev.run_command("show bgp neighbor")
+                pattern = re.compile("State: .*  ")
+                result = pattern.findall(state)[0]
+                result = result.split(":")[1].strip()
+            else:
+                state = dev.run_command(
+                    "<get-bgp-neighbor-information></get-bgp-neighbor-information>",
+                    "//peer-state"
+                )
+                result = state[0].text
+            if result != "Established":
+                return "False"
+        return "True"

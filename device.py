@@ -1,4 +1,3 @@
-import re
 from ncclient import manager
 from netmiko import ConnectHandler
 from robot.api.deco import keyword, library
@@ -63,17 +62,3 @@ class Device():
             self.conn.commit()
             self.conn.unlock()
             return diff.data_xml
-
-    def check_bgp_state(self):
-        if self.legacy:
-            state = self.run_command("show bgp neighbor")
-            pattern = re.compile("State: .*  ")
-            result = pattern.findall(state)[0]
-            result = result.split(":")[1].strip()
-        else:
-            state = self.run_command(
-                "<get-bgp-neighbor-information></get-bgp-neighbor-information>",
-                "//peer-state"
-            )
-            result = state[0].text
-        return result
