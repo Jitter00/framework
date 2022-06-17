@@ -4,18 +4,15 @@ from netmiko import ConnectHandler
 from robot.api.deco import keyword, library
 
 
-@library
-class JunosDevice():
+class Device():
 
-    @keyword
-    def connect_device(self, host, username, password):
+    def __init__(self, host, username="cristian", password="Juniper", legacy=False):
         self.host = host
         self.username = username
         self.password = password
-        if self.host == "vsrx2":
-            self.legacy = True
-        else:
-            self.legacy = False
+        self.legacy = legacy
+
+    def connect(self):
         if self.legacy:
             self.conn = ConnectHandler(
                 device_type="juniper_junos",
@@ -33,6 +30,10 @@ class JunosDevice():
                 hostkey_verify=False
             )
 
+    def disconnect(self):
+        if self.legacy:
+            self.conn.disconnect()
+
     def run_command(self, cmd, xpath=None):
         if self.legacy:
             output = self.conn.send_command(cmd)
@@ -42,14 +43,14 @@ class JunosDevice():
                 return self.conn.rpc(cmd).xpath(xpath)
             return self.conn.rpc(cmd)
 
-    @keyword
-    def apply_config(self, cfg, from_file=False):
+    def apply_config(self, cfg, from_file=True):
         if self.legacy:
             if from_file:
                 result = self.conn.send_config_from_file(f"configs/{cfg}")
             else:
                 result = self.conn.send_config_set(cfg)
             self.conn.commit()
+            self.conn.exit_config_mode()
             return result
         else:
             if from_file:
@@ -63,7 +64,6 @@ class JunosDevice():
             self.conn.unlock()
             return diff.data_xml
 
-    @keyword
     def check_bgp_state(self):
         if self.legacy:
             state = self.run_command("show bgp neighbor")
