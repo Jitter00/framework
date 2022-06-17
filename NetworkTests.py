@@ -49,5 +49,5 @@ class NetworkTests:
                 )
                 result = state[0].text
             if result != "Established":
-                return "False"
-        return "True"
+                return False
+        return True
